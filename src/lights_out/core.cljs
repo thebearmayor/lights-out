@@ -9,21 +9,29 @@
 
 (enable-console-print!)
 
-;; define your app data so that it doesn't get over-written on reload
-;; (defonce app-data (atom {}))
-
-(defonce board-state
-  (atom
-    {[0 0] {:lit true} [0 1] {:lit false} [0 2] {:lit false} [0 3] {:lit true}
-     [1 0] {:lit false} [1 1] {:lit true} [1 2] {:lit true} [1 3] {:lit false}
-     [2 0] {:lit false} [2 1] {:lit true} [2 2] {:lit true} [2 3] {:lit false}
-     [3 0] {:lit true} [3 1] {:lit false} [3 2] {:lit false} [3 3] {:lit true}
-     }))
-
 (fw/watch-and-reload
  :jsload-callback (fn []
                     ;; (stop-and-start-my app)
                     ))
+
+(defn toggle-light [state light]
+  (update-in state [light] not))
+
+(defn toggle-lights [state lights]
+  (reduce toggle-light state lights))
+
+(defonce board-state
+  (atom
+    (let [all-off (into {} (for [x (range 5) y (range 5)] [[x y] false]))]
+      (toggle-lights all-off [
+
+  [0 0]                   [0 4]
+        [1 1] [1 2] [1 3]
+        [2 1] [2 2] [2 3]
+        [3 1] [3 2] [3 3]
+  [4 0]                   [4 4]
+                              
+  ]))))
 
 (defn find-neighbors [[x y]]
   (for 
@@ -37,21 +45,14 @@
 
 (defcomponent light [state _]
   (render-state [_ {:keys [toggle-chan]}]
-          (let [[location {:keys [lit]}] state
-                color (if lit "red" "black")
-                ] 
+          (let [[location lit] state
+                color (if lit "red" "black")] 
             (dom/td
               (dom/div {:style {:border "solid"
                                 :background-color color
                                 :width "50px"
                                 :height "50px"}
                         :on-click (fn [_] (put! toggle-chan location))})))))
-
-(defn toggle-light [state light]
-  (update-in state [light :lit] not))
-
-(defn toggle-lights [state lights]
-  (reduce toggle-light state lights))
 
 (defcomponent board [state owner]
   (init-state [_]
@@ -66,9 +67,9 @@
                            (recur)))))
   (render-state [_ {:keys [toggle-chan]}]
                 (dom/table
-                  (for [x (range 4)]
+                  (for [x (range 5)]
                     (dom/tr
-                      (for [y (range 4)]
+                      (for [y (range 5)]
                         (om/build light (find state [x y])
                                   {:init-state {:toggle-chan toggle-chan}})))))))
 

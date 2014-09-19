@@ -11,6 +11,7 @@
                  [org.clojure/core.async "0.1.338.0-5c5012-alpha"]
                  [prismatic/om-tools "0.3.2"]
                  [kioo "0.4.1-SNAPSHOT"] 
+                 [com.facebook/react "0.11.2"]
                  [om "0.7.1"]]
   
   :plugins [[lein-cljsbuild "1.0.3"]
